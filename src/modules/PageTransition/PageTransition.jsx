@@ -36,6 +36,13 @@ export default class PageTransition extends React.Component {
     History.listen(this.historyChange.bind(this));
   }
 
+  /**
+   * setRoutes - Creates route object
+   * Each route has a string path as a key, and a component (page)
+   * as the value
+   *
+   * @return {void}
+   */
   setRoutes() {
     return new Promise((resolve) => {
       const routes = {};
@@ -48,11 +55,24 @@ export default class PageTransition extends React.Component {
     });
   }
 
+  /**
+   * setPageForRoute - Sets the current page
+   *
+   * @param  {String} route - the page that should be loaded
+   * @return {void}
+   */
   setPageForRoute(route) {
     const page = this.getPageForRoute(route);
     this.setState({ currentPage: page });
   }
 
+  /**
+   * getPageForRoute - Retrieves the requested page or null
+   * if it doesn't exist
+   *
+   * @param  {type} path - the page that should be loaded
+   * @return {Page} Page component
+   */
   getPageForRoute(path) {
     const page = this.state.routes[path];
     if (typeof page === 'object') {
@@ -62,10 +82,25 @@ export default class PageTransition extends React.Component {
     }
   }
 
+  /**
+   * historyChange - History callback function
+   * Initiates page change
+   *
+   * @param  {Object} location - Window location object
+   * @param  {String} action - PUSH or POP
+   * @return {void}
+   */
   historyChange(location, action) {
     this.goToRoute(location.pathname, action);
   }
 
+  /**
+   * goToRoute - Begin page transition to requested page
+   *
+   * @param  {String} route - Page to transition to
+   * @param  {String} action - OPTIONAL for handling history PUSH or POP differently
+   * @return {void}
+   */
   goToRoute(route, action) {
     // switch (action) {
     //   case 'PUSH':
@@ -79,6 +114,13 @@ export default class PageTransition extends React.Component {
     this.routeWillChange(route);
   }
 
+  /**
+   * routeWillChange - Function called before route changes.
+   * Notifies parent if `routeWillChange` passed as prop
+   *
+   * @param  {String} route - Page to be loaded
+   * @return {void}
+   */
   routeWillChange(route) {
     console.log('route will change');
 
@@ -96,6 +138,13 @@ export default class PageTransition extends React.Component {
     });
   }
 
+
+  /**
+   * routeDidChange - Function called after route changed
+   * Notifies parent if `routeDidChange` passed as prop
+   *
+   * @return {void}
+   */
   routeDidChange() {
     console.log('route did change');
     // Notify parent if needed
@@ -104,11 +153,23 @@ export default class PageTransition extends React.Component {
     }
   }
 
+
+  /**
+   * enterPageComplete - Function called after page enter animation complete
+   *
+   * @return {void}
+   */
   enterPageComplete() {
     console.log('enter page complete');
     this.routeDidChange();
   }
 
+
+  /**
+   * exitPageComplete - Function called after page finished exiting
+   *
+   * @return {type}  description
+   */
   exitPageComplete() {
     console.log('exit page complete');
     this.setState({ currentPage: this.getPageForRoute(this.state.currentRoute) });
