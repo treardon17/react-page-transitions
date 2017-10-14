@@ -25,16 +25,26 @@ export default class Routes extends React.Component {
     };
   }
 
-  // enterPageAnimation={{ animation: { opacity: 1, translateX: [0, '100%'] }, duration: 500 }}
-  // exitPageAnimation={{ animation: { opacity: 0, translateX: ['-100%', 0] }, duration: 500 }}
+  // enterPageAnimation={{ animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 }}
+  // exitPageAnimation={{ animation: { opacity: 0, translateX: '-100%' }, duration: 500 }}
 
   render() {
+    const animationObject = {
+      pop: {
+        enter: { animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 },
+        exit: { animation: { opacity: [0, 1], translateX: ['-100%', '0%'] }, duration: 500 },
+      },
+      push: {
+        enter: { animation: { opacity: [1, 0], translateX: ['0%', '-100%'] }, duration: 500 },
+        exit: { animation: { opacity: [0, 1], translateX: ['100%', '0%'] }, duration: 500 },
+      },
+    };
+
     return (
       <div id="app-container">
         <PageTransition
           routes={this.state.routes}
-          enterPageAnimation={{ animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 }}
-          exitPageAnimation={{ animation: { opacity: 0, translateX: '-100%' }, duration: 500 }}
+          animations={animationObject}
         />
       </div>
     );

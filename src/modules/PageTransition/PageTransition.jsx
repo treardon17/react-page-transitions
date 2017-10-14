@@ -30,6 +30,7 @@ export default class PageTransition extends React.Component {
       prevRoute: null,
       currentPage: null,
     };
+    this.currentAction = '';
   }
 
   setBinds() {
@@ -102,15 +103,8 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   goToRoute(route, action) {
-    // switch (action) {
-    //   case 'PUSH':
-    //     break;
-    //   case 'POP':
-    //     break;
-    //   default:
-    //     break;
-    // }
     console.log('GOING TO ROUTE:', route, action);
+    this.currentAction = action ? action.toLowerCase() : null;
     this.routeWillChange(route);
   }
 
@@ -138,7 +132,6 @@ export default class PageTransition extends React.Component {
     });
   }
 
-
   /**
    * routeDidChange - Function called after route changed
    * Notifies parent if `routeDidChange` passed as prop
@@ -153,7 +146,6 @@ export default class PageTransition extends React.Component {
     }
   }
 
-
   /**
    * enterPageComplete - Function called after page enter animation complete
    *
@@ -163,7 +155,6 @@ export default class PageTransition extends React.Component {
     console.log('enter page complete');
     this.routeDidChange();
   }
-
 
   /**
    * exitPageComplete - Function called after page finished exiting
@@ -176,12 +167,15 @@ export default class PageTransition extends React.Component {
   }
 
   render() {
-    // const enterStartStyles = this.props.enterPageStartStyles || { opacity: 1 };
-    // const enterEndStyles = this.props.enterPageEndStyles || { opacity: 1 };
-    // const exitStartStyles = this.props.exitPageStartStyles || { opacity: 1 };
-    // const exitEndStyles = this.props.exitPageEndStyles || { opacity: 1 };
-    const newEnterAnimation = this.props.enterPageAnimation || { animation: { opacity: 1 }, duration: 0 };
-    const newExitAnimation = this.props.exitPageAnimation || { animation: { opacity: 1 }, duration: 0 };
+    const animations = this.props.animations[this.currentAction];
+    let newEnterAnimation = { animation: { opacity: 1 }, duration: 0 };
+    let newExitAnimation = { animation: { opacity: 1 }, duration: 0 };
+
+    if (animations) {
+      if (animations.enter) { newEnterAnimation = animations.enter; }
+      if (animations.exit) { newExitAnimation = animations.exit; }
+    }
+
     newEnterAnimation.complete = this.enterPageComplete.bind(this);
     newExitAnimation.complete = this.exitPageComplete.bind(this);
 
@@ -204,14 +198,5 @@ PageTransition.propTypes = {
   routes: PropTypes.array.isRequired,
   routeWillChange: PropTypes.func,
   routeDidChange: PropTypes.func,
-  enterPageAnimation: PropTypes.object,
-  exitPageAnimation: PropTypes.object,
-  enterPageStartStyles: PropTypes.object,
-  enterPageEndStyles: PropTypes.object,
-  exitPageStartStyles: PropTypes.object,
-  exitPageEndStyles: PropTypes.object,
-  // exitPageStartAnimation: PropTypes.object,
-  // exitPageEndAnimation: PropTypes.object,
-  // enterPageStartAnimation: PropTypes.object,
-  // enterPageEndAnimation: PropTypes.object,
+  animations: PropTypes.object,
 };
