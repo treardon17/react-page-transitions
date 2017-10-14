@@ -4,32 +4,27 @@ import { VelocityTransitionGroup } from 'velocity-react';
 import AppState from '../../state/AppState';
 import History from '../../state/History';
 
-// scss
-import './PageTransition.scss';
-
 // Class defining the actual transitions
 export default class PageTransition extends React.Component {
   constructor(props) {
     super(props);
     this.setDefaults();
+    this.setBinds();
+    this.setRoutes();
   }
 
   componentDidMount() {
-    this.setBinds();
-    this.setRoutes()
-      .then(() => {
-        this.setPageForRoute(this.state.currentRoute);
-      });
+    this.setPageForRoute(this.state.currentRoute);
   }
 
   setDefaults() {
     this.state = {
-      routes: {},
       currentRoute: window.location.pathname,
       prevRoute: null,
       currentPage: null,
     };
     this.currentAction = '';
+    this.routes = {};
   }
 
   setBinds() {
@@ -44,15 +39,12 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   setRoutes() {
-    return new Promise((resolve) => {
-      const routes = {};
-      for (let i = 0; i < this.props.routes.length; i+=1) {
-        const routeItem = this.props.routes[i];
-        routes[routeItem.props.path] = routeItem;
-      }
-
-      this.setState({ routes }, resolve);
-    });
+    const routes = {};
+    for (let i = 0; i < this.props.routes.length; i+=1) {
+      const routeItem = this.props.routes[i];
+      routes[routeItem.props.path] = routeItem;
+    }
+    this.routes = routes;
   }
 
   /**
@@ -74,7 +66,7 @@ export default class PageTransition extends React.Component {
    * @return {Page} Page component
    */
   getPageForRoute(path) {
-    const page = this.state.routes[path];
+    const page = this.routes[path];
     if (typeof page === 'object') {
       return page;
     } else {
@@ -120,7 +112,6 @@ export default class PageTransition extends React.Component {
     }
 
     // Set current route and previous route.
-    //  currentPage is set to null so the transition out will begin.
     this.setState({
       currentRoute: route,
       prevRoute: this.state.currentRoute,
@@ -142,6 +133,18 @@ export default class PageTransition extends React.Component {
   }
 
   /**
+   * enterPageBegin - Function called when enter animation begins
+   *
+   * @return {void}
+   */
+  enterPageBegin() {
+    // Notify parent if needed
+    if (typeof this.props.enterAnimationBegin === 'function') {
+      this.props.enterAnimationBegin(route);
+    }
+  }
+
+  /**
    * enterPageComplete - Function called after page enter animation complete
    *
    * @return {void}
@@ -150,15 +153,27 @@ export default class PageTransition extends React.Component {
     this.routeDidChange();
   }
 
+
+  /**
+   * exitPageBegin - Function called when exit animation begins
+   *
+   * @return {void}
+   */
+  exitPageBegin() {
+    // Notify parent if needed
+    if (typeof this.props.exitAnimationBegin === 'function') {
+      this.props.exitAnimationBegin(route);
+    }
+  }
+
   /**
    * exitPageComplete - Function called after page finished exiting
    *
    * @return {type}  description
    */
   exitPageComplete() {
-    this.setState({ currentPage: this.getPageForRoute(this.state.currentRoute) });
+    this.setPageForRoute(this.state.currentRoute);
   }
-
 
   /**
    * createAnimations - Creates animations based on current action and load status
@@ -166,14 +181,12 @@ export default class PageTransition extends React.Component {
    * @return {Object}  Object containing `enterAnimation` and `exitAnimation`
    */
   createAnimations() {
-    const animations = this.props.animations;
-    // Default animations
-    let newEnterAnimation = animations ?
-      { animation: { opacity: [0, 0] }, duration: 200 }
-      :
-      { animation: { opacity: 1 }, duration: 200 };
+    const currentPage = this.getPageForRoute(this.state.currentRoute);
+    // If the current page has specific animations, those override the general animations
+    const animations = (currentPage ? currentPage.props.animations : null) || this.props.animations;
+    let newEnterAnimation = null;
+    let newExitAnimation = null;
 
-    let newExitAnimation = { animation: { opacity: 0 }, duration: 200 };
     // If we even have animations
     if (animations) {
       // If we're on the initial load
@@ -184,13 +197,21 @@ export default class PageTransition extends React.Component {
       } else if (this.currentAction === History.directions.push.toLowerCase()
         || this.currentAction === History.directions.pop.toLowerCase()) {
         // If we're coming from a history action
-        const actionAnimations = this.props.animations[this.currentAction];
+        const actionAnimations = animations[this.currentAction];
         if (actionAnimations.enter) { newEnterAnimation = actionAnimations.enter; }
         if (actionAnimations.exit) { newExitAnimation = actionAnimations.exit; }
       }
     }
 
+    // Set the default animations if no animations were found
+    if (!newEnterAnimation) { newEnterAnimation = { animation: { opacity: [1, 0] }, duration: 300 }; }
+    if (!newExitAnimation) { newExitAnimation = { animation: { opacity: [0, 1] }, duration: 300 }; }
+
     // Set completion handlers
+    // BEGIN
+    newEnterAnimation.begin = this.enterPageBegin.bind(this);
+    newExitAnimation.begin = this.exitPageBegin.bind(this);
+    // COMPLETE
     newEnterAnimation.complete = this.enterPageComplete.bind(this);
     newExitAnimation.complete = this.exitPageComplete.bind(this);
 
@@ -202,14 +223,12 @@ export default class PageTransition extends React.Component {
 
   render() {
     const { enterAnimation, exitAnimation } = this.createAnimations();
-
     return (
       <div className="page-transition">
         <button onClick={() => { History.push('/test'); }} />
         <VelocityTransitionGroup
           enter={enterAnimation}
           leave={exitAnimation}
-          runOnMount
         >
           {this.state.currentPage}
         </VelocityTransitionGroup>
@@ -222,6 +241,8 @@ PageTransition.propTypes = {
   routes: PropTypes.array.isRequired,
   routeWillChange: PropTypes.func,
   routeDidChange: PropTypes.func,
+  exitAnimationBegin: PropTypes.func,
+  enterAnimationBegin: PropTypes.func,
   animations: PropTypes.object,
   loadAnimationName: PropTypes.string,
 };
