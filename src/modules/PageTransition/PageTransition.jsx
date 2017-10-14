@@ -19,7 +19,6 @@ export default class PageTransition extends React.Component {
     this.setRoutes()
       .then(() => {
         this.setPageForRoute(this.state.currentRoute);
-        console.log(this.state.currentPage);
       });
   }
 
@@ -103,7 +102,6 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   goToRoute(route, action) {
-    console.log('GOING TO ROUTE:', route, action);
     this.currentAction = action ? action.toLowerCase() : null;
     this.routeWillChange(route);
   }
@@ -116,8 +114,6 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   routeWillChange(route) {
-    console.log('route will change');
-
     // Notify parent if needed
     if (typeof this.props.routeWillChange === 'function') {
       this.props.routeWillChange(route);
@@ -139,7 +135,6 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   routeDidChange() {
-    console.log('route did change');
     // Notify parent if needed
     if (typeof this.props.routeDidChange === 'function') {
       this.props.routeDidChange(route);
@@ -152,7 +147,6 @@ export default class PageTransition extends React.Component {
    * @return {void}
    */
   enterPageComplete() {
-    console.log('enter page complete');
     this.routeDidChange();
   }
 
@@ -162,29 +156,59 @@ export default class PageTransition extends React.Component {
    * @return {type}  description
    */
   exitPageComplete() {
-    console.log('exit page complete');
     this.setState({ currentPage: this.getPageForRoute(this.state.currentRoute) });
   }
 
-  render() {
-    const animations = this.props.animations[this.currentAction];
-    let newEnterAnimation = { animation: { opacity: 1 }, duration: 0 };
-    let newExitAnimation = { animation: { opacity: 1 }, duration: 0 };
 
+  /**
+   * createAnimations - Creates animations based on current action and load status
+   *
+   * @return {Object}  Object containing `enterAnimation` and `exitAnimation`
+   */
+  createAnimations() {
+    const animations = this.props.animations;
+    // Default animations
+    let newEnterAnimation = animations ?
+      { animation: { opacity: [0, 0] }, duration: 200 }
+      :
+      { animation: { opacity: 1 }, duration: 200 };
+
+    let newExitAnimation = { animation: { opacity: 0 }, duration: 200 };
+    // If we even have animations
     if (animations) {
-      if (animations.enter) { newEnterAnimation = animations.enter; }
-      if (animations.exit) { newExitAnimation = animations.exit; }
+      // If we're on the initial load
+      if (this.currentAction === ''
+        && this.props.loadAnimationName
+        && animations[this.props.loadAnimationName]) {
+        newEnterAnimation = animations[this.props.loadAnimationName];
+      } else if (this.currentAction === History.directions.push.toLowerCase()
+        || this.currentAction === History.directions.pop.toLowerCase()) {
+        // If we're coming from a history action
+        const actionAnimations = this.props.animations[this.currentAction];
+        if (actionAnimations.enter) { newEnterAnimation = actionAnimations.enter; }
+        if (actionAnimations.exit) { newExitAnimation = actionAnimations.exit; }
+      }
     }
 
+    // Set completion handlers
     newEnterAnimation.complete = this.enterPageComplete.bind(this);
     newExitAnimation.complete = this.exitPageComplete.bind(this);
+
+    return {
+      enterAnimation: newEnterAnimation,
+      exitAnimation: newExitAnimation,
+    };
+  }
+
+  render() {
+    const { enterAnimation, exitAnimation } = this.createAnimations();
 
     return (
       <div className="page-transition">
         <button onClick={() => { History.push('/test'); }} />
         <VelocityTransitionGroup
-          enter={newEnterAnimation}
-          leave={newExitAnimation}
+          enter={enterAnimation}
+          leave={exitAnimation}
           runOnMount
         >
           {this.state.currentPage}
@@ -199,4 +223,5 @@ PageTransition.propTypes = {
   routeWillChange: PropTypes.func,
   routeDidChange: PropTypes.func,
   animations: PropTypes.object,
+  loadAnimationName: PropTypes.string,
 };

@@ -25,11 +25,9 @@ export default class Routes extends React.Component {
     };
   }
 
-  // enterPageAnimation={{ animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 }}
-  // exitPageAnimation={{ animation: { opacity: 0, translateX: '-100%' }, duration: 500 }}
-
   render() {
     const animationObject = {
+      load: { animation: { opacity: [1, 0], translateY: ['0px', '200px'] }, duration: 600 },
       pop: {
         enter: { animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 },
         exit: { animation: { opacity: [0, 1], translateX: ['-100%', '0%'] }, duration: 500 },
@@ -45,6 +43,7 @@ export default class Routes extends React.Component {
         <PageTransition
           routes={this.state.routes}
           animations={animationObject}
+          loadAnimationName="load"
         />
       </div>
     );

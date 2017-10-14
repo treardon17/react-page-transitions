@@ -73,8 +73,6 @@ class History {
   getHistoryDirection(location) {
     const prevRoute = this.hashHistory[this.hashHistory.length - 2];
     const currentRoute = location.pathname;
-    console.log('prev route: ', prevRoute);
-    console.log('current route: ', currentRoute);
 
     if (prevRoute === currentRoute) {
       this.hashHistory.pop();
