@@ -1,28 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { VelocityTransitionGroup } from 'velocity-react';
-// import { Router, Route } from 'react-router-dom';
-import createHistory from 'history/createBrowserHistory';
 import AppState from '../../state/AppState';
+import History from '../../state/History';
 
 // scss
 import './PageTransition.scss';
 
-// Wrapper element for the pages
-class Route extends React.Component {
-  render() {
-    return this.props.component();
-  }
-}
-
-Route.propTypes = {
-  path: PropTypes.string.isRequired,
-  component: PropTypes.func.isRequired,
-  exact: PropTypes.bool,
-};
-
 // Class defining the actual transitions
-class PageTransition extends React.Component {
+export default class PageTransition extends React.Component {
   constructor(props) {
     super(props);
     this.setDefaults();
@@ -44,19 +30,10 @@ class PageTransition extends React.Component {
       prevRoute: null,
       currentPage: null,
     };
-    this.history = createHistory();
   }
 
   setBinds() {
-    // window.addEventListener('popstate', this.historyChange.bind(this));
-    this.history.listen(this.historyChange.bind(this));
-
-    // let home = true;
-    // setInterval(() => {
-    //   // this.history.push('/test');
-    //   console.log(history);
-    //   home = !home;
-    // }, 2000);
+    History.listen(this.historyChange.bind(this));
   }
 
   setRoutes() {
@@ -86,19 +63,19 @@ class PageTransition extends React.Component {
   }
 
   historyChange(location, action) {
-    this.goToRoute(location.pathname);
-    switch (action) {
-      case 'PUSH':
-        break;
-      case 'POP':
-        break;
-      default:
-        break;
-    }
-    console.log(location, action);
+    this.goToRoute(location.pathname, action);
   }
 
-  goToRoute(route) {
+  goToRoute(route, action) {
+    // switch (action) {
+    //   case 'PUSH':
+    //     break;
+    //   case 'POP':
+    //     break;
+    //   default:
+    //     break;
+    // }
+    console.log('GOING TO ROUTE:', route, action);
     this.routeWillChange(route);
   }
 
@@ -149,6 +126,7 @@ class PageTransition extends React.Component {
 
     return (
       <div className="page-transition">
+        <button onClick={() => { History.push('/test'); }} />
         <VelocityTransitionGroup
           enter={newEnterAnimation}
           leave={newExitAnimation}
@@ -175,9 +153,4 @@ PageTransition.propTypes = {
   // exitPageEndAnimation: PropTypes.object,
   // enterPageStartAnimation: PropTypes.object,
   // enterPageEndAnimation: PropTypes.object,
-};
-
-export {
-  Route,
-  PageTransition,
 };

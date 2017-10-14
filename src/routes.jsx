@@ -4,7 +4,8 @@ import AppState from './state/AppState';
 // import styles
 import './resources/styles/base.scss';
 // import components
-import { PageTransition, Route } from './modules/PageTransition/PageTransition';
+import PageTransition from './modules/PageTransition/PageTransition';
+import Route from './modules/Route/Route';
 // import pages
 import Home from './pages/Home';
 import Test from './pages/Test';
