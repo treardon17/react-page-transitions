@@ -9,8 +9,14 @@ export default class Home extends React.Component {
   }
 
   render() {
+    const styles = {
+      backgroundColor: 'black',
+      height: '100vh',
+      color: 'white',
+    };
+
     return (
-      <div id="Home">
+      <div id="Home" style={styles}>
         <h1>Welcome to the Home page</h1>
       </div>
     );

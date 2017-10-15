@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { VelocityTransitionGroup } from 'velocity-react';
+import { VelocityTransitionGroup, VelocityComponent } from 'velocity-react';
+import { Motion, spring } from 'react-motion';
 import AppState from '../../state/AppState';
 import History from '../../state/History';
 
@@ -182,14 +183,17 @@ export default class PageTransition extends React.Component {
    */
   createAnimations() {
     const currentPage = this.getPageForRoute(this.state.currentRoute);
-    // If the current page has specific animations, those override the general animations
-    const animations = (currentPage ? currentPage.props.animations : null) || this.props.animations;
+    // All animations merged into one object. If a route has a specific animation,
+    // that animation will override the general animations.
+    const animations = Object.assign({}, this.props.animations, currentPage.props.animations);
+    console.log(currentPage.props.animations);
+
     let newEnterAnimation = null;
     let newExitAnimation = null;
 
     // If we even have animations
     if (animations) {
-      // If we're on the initial load
+      // HANDLE LOADING ANIMATIONS
       if (this.currentAction === ''
         && this.props.loadAnimationName
         && animations[this.props.loadAnimationName]) {
@@ -222,6 +226,7 @@ export default class PageTransition extends React.Component {
   }
 
   render() {
+    console.log('rendering');
     const { enterAnimation, exitAnimation } = this.createAnimations();
     return (
       <div className="page-transition">
@@ -229,6 +234,7 @@ export default class PageTransition extends React.Component {
         <VelocityTransitionGroup
           enter={enterAnimation}
           leave={exitAnimation}
+          runOnMount
         >
           {this.state.currentPage}
         </VelocityTransitionGroup>

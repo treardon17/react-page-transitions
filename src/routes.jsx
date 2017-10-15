@@ -17,7 +17,7 @@ export default class Routes extends React.Component {
     super(props);
 
     const animationObject = {
-      load: { animation: { opacity: 1, translateY: ['0px', '1000px'] }, duration: 1000 },
+      load: { animation: { opacity: [1, 0], translateY: ['0%', '100%'] }, duration: 500 },
       pop: {
         enter: { animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 },
         exit: { animation: { opacity: [0, 1], translateX: ['-100%', '0%'] }, duration: 500 },
@@ -44,7 +44,7 @@ export default class Routes extends React.Component {
 
   render() {
     const animationObject = {
-      load: { animation: { opacity: [1, 0], translateY: ['0px', '200px'] }, duration: 600 },
+      load: { animation: { opacity: [1, 0], translateY: ['0%', '100%'] }, duration: 600 },
       pop: {
         enter: { animation: { opacity: [1, 0], translateX: ['0%', '100%'] }, duration: 500 },
         exit: { animation: { opacity: [0, 1], translateX: ['-100%', '0%'] }, duration: 500 },
