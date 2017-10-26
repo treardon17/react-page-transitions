@@ -3,24 +3,20 @@ import PropTypes from 'prop-types';
 import AppState from 'state/AppState.jsx';
 // import modules here
 
-export default class Test extends React.Component {
+export default class Modal extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    if (this.props.parameters) {
-      console.log(this.props.parameters.urlParams);
-    }
     return (
-      <div id="Test">
-        <h1>Welcome to the Test page</h1>
+      <div id="Modal">
+        <h1>Welcome to the Modal page</h1>
       </div>
     );
   }
 }
 
-Test.propTypes = {
+Modal.propTypes = {
   state: PropTypes.instanceOf(AppState),
-  parameters: PropTypes.object,
 };
